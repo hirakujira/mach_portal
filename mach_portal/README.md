@@ -1,19 +1,18 @@
-/* ianbeer */
-
+ianbeer
+=======
 READ THIS FIRST:
-if you do not have an iPod touch 6g running 10.1.1 (14b100) or and iPad mini 2 running 10.1.1 (14b100) this project will
-not work out of the box(*)! You need to fix up a couple of offsets - see the section futher down
-"Adding support for more devices"
+===============
+##if you do not have an iPod touch 6g running 10.1.1 (14b100) or and iPad mini 2 running 10.1.1 (14b100) this project will not work out of the box(*)! You need to fix up a couple of offsets - see the section futher down "Adding support for more devices"
 
-(*) more precisely, I only have those devices and have only tested it on them.
-(*) 1b4150 will probably also work, I haven't tested it.
+- more precisely, I only have those devices and have only tested it on them.
+- 1b4150 will probably also work, I haven't tested it.
 
-Contents:
+### Contents
  1 - Build Instructions
  2 - Adding support for other devices
  3 - Notes on the bugs and exploits
 
-*** (1) Build Instructions ***
+### (1) Build Instructions
 
  * download and install Xcode 8.1 or higher
 
@@ -88,27 +87,28 @@ Contents:
 
  * When you’re done hold power and home to reset the device
 
-*** (2) Adding support for other devices ***
- * you have to do this manually, sorry!
+### (2) Adding support for other devices
 
+ * you have to do this manually, sorry!
  * download the ipsw for your device from https://www.theiphonewiki.com/wiki/Firmware
    The bugs are there in any version <= 10.1.1 but the further back you go the more offsets
    will be wrong so ideally stick to 10.1.1 (and for anything earlier that iOS 10 the kernel cache
    is encrypted so you'll have to do the rest yourself)
 
  * for >= iOS 10 unzip the ipsw and hexdump the kernel.release.* file like this:
-
-$ hexdump -C kernelcache.release.n51 | head
-00000000  30 83 b5 9b 0d 16 04 49  4d 34 50 16 04 6b 72 6e  |0......IM4P..krn|
-00000010  6c 16 1c 4b 65 72 6e 65  6c 43 61 63 68 65 42 75  |l..KernelCacheBu|
-00000020  69 6c 64 65 72 2d 31 31  36 32 2e 32 30 2e 31 04  |ilder-1162.20.1.|
-00000030  83 b5 9a de 63 6f 6d 70  6c 7a 73 73 83 13 7d ae  |....complzss..}.|
-00000040  01 64 80 00 00 b5 29 5e  00 00 00 01 00 00 00 00  |.d....)^........|
-00000050  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
-*
-000001b0  00 00 00 00 ff cf fa ed  fe 0c 00 00 01 d5 00 f6  |................|
-000001c0  f0 02 f6 f0 14 f6 f0 38  0e 9a f3 f1 20 f6 f1 00  |.......8.... ...|
-000001d0  19 ff f1 f5 f0 5f 9f 5f  54 45 58 54 09 02 1c 03  |....._._TEXT....|
+```
+    $ hexdump -C kernelcache.release.n51 | head
+    00000000  30 83 b5 9b 0d 16 04 49  4d 34 50 16 04 6b 72 6e  |0......IM4P..krn|
+    00000010  6c 16 1c 4b 65 72 6e 65  6c 43 61 63 68 65 42 75  |l..KernelCacheBu|
+    00000020  69 6c 64 65 72 2d 31 31  36 32 2e 32 30 2e 31 04  |ilder-1162.20.1.|
+    00000030  83 b5 9a de 63 6f 6d 70  6c 7a 73 73 83 13 7d ae  |....complzss..}.|
+    00000040  01 64 80 00 00 b5 29 5e  00 00 00 01 00 00 00 00  |.d....)^........|
+    00000050  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+    *
+    000001b0  00 00 00 00 ff cf fa ed  fe 0c 00 00 01 d5 00 f6  |................|
+    000001c0  f0 02 f6 f0 14 f6 f0 38  0e 9a f3 f1 20 f6 f1 00  |.......8.... ...|
+    000001d0  19 ff f1 f5 f0 5f 9f 5f  54 45 58 54 09 02 1c 03  |....._._TEXT....|
+```
 
  * note down the offset of the ff cf fa ed fe byte sequence (in this case it's 0x1b4)
 
@@ -154,12 +154,12 @@ $ hexdump -C kernelcache.release.n51 | head
    All the offsets will be totally different and the code which manipulates the kernel data structures will also be completely wrong.
    There's no reason it wouldn't work but you'll have to fix the code to make it work
 
-*** fixing userspace stuff ***
+### fixing userspace stuff
 
 I also rely on a handful of offsets in amfid; you should be able to find those very easily if they're different on your target.
 See the code and alse the section "Patch amfid" below.
 
-*** (3) Notes on the bugs and exploits ***
+### (3) Notes on the bugs and exploits
 
 This project is called "mach_portal" - it's the result of a research project I did this year looking at mach ports. (All the bugs used
 involve mach ports :-) ) There are two main bugs plus one more which is only used to force a service to restart:
@@ -199,7 +199,7 @@ in turn. I then receive all the ports I sent to myself and if everything worked 
 Here's a more detailed writeup of the sandbox escape part of the exploit. You'll have to read the code for the kernel exploit, I haven't written
 a longer writeup for that yet.
 
-*** Sandbox escape ***
+### Sandbox escape
 
 When sending and receiving mach messages from userspace there are two important kernel objects; ipc_entry and
 ipc_object.
@@ -210,7 +210,7 @@ ipc_object is the actual message queue (or kernel object) which the port refers 
 
 ipc_entrys have a pointer to the ipc_object they are a handle for along with the ie_bits field which contains
 the urefs and capacility bits for this name/handle (whether this is a send right, receive right etc.)
-
+```
   struct ipc_entry {
     struct ipc_object *ie_object;
     ipc_entry_bits_t ie_bits;
@@ -220,7 +220,7 @@ the urefs and capacility bits for this name/handle (whether this is a send right
       ipc_table_index_t request;  /* dead name request notify */
     } index;
   };
-
+```
 #define IE_BITS_UREFS_MASK  0x0000ffff  /* 16 bits of user-reference */
 #define IE_BITS_UREFS(bits) ((bits) & IE_BITS_UREFS_MASK)
 
@@ -319,7 +319,7 @@ This requires us to dig in a bit to exacly what a port name is, how they're allo
 and under what circumstances they'll be reused.
 
 Mach ports are stored in a flat array of ipc_entrys:
-
+```
   struct ipc_entry {
     struct ipc_object *ie_object;
     ipc_entry_bits_t ie_bits;
@@ -329,21 +329,21 @@ Mach ports are stored in a flat array of ipc_entrys:
       ipc_table_index_t request;  /* dead name request notify */
     } index;
   };
-
+```
 mach port names are made up of two fields, the upper 24 bits are an index into the ipc_entrys table
 and the lower 8 bits are a generation number. Each time an entry in the ipc_entrys table is reused
 the generation number is incremented. There are 64 generations, so after an entry has been reallocated
 64 times it will have the same generation number.
 
 The generation number is checked in ipc_entry_lookup:
-
+```
   if (index <  space->is_table_size) {
                 entry = &space->is_table[index];
     if (IE_BITS_GEN(entry->ie_bits) != MACH_PORT_GEN(name) ||
         IE_BITS_TYPE(entry->ie_bits) == MACH_PORT_TYPE_NONE)
       entry = IE_NULL;    
   }
-
+```
 here entry is the ipc_entry struct in the kernel and name is the user-supplied mach port name.
 
 Entry allocation:
@@ -385,20 +385,20 @@ I still have to MITM all these new connections to iohideventsystem. As mentioned
 it their task ports, so all I have to do is crash a process which runs as root and is a client of iohideventsystem. When it
 restarts it will send it's task port to me :-)
 
-*** Powerd crasher ***
+### Powerd crasher
 
 To crash powerd I use CVE-2016-7661:
 
 powerd checks in with launchd to get a server port and then wraps that in a CFPort:
-
+```
   pmServerMachPort = _SC_CFMachPortCreateWithPort(
                           "PowerManagement",
                           serverPort, 
                           mig_server_callback, 
                           &context);
-
+```
 It also asks to receive dead name notifications for other ports on that same server port:
-
+```
   mach_port_request_notification(
               mach_task_self(),           // task
               notify_port_in,                 // port that will die
@@ -407,9 +407,9 @@ It also asks to receive dead name notifications for other ports on that same ser
               CFMachPortGetPort(pmServerMachPort),        // notify port
               MACH_MSG_TYPE_MAKE_SEND_ONCE,               // notifyPoly
               &oldNotify);                                // previous
-
+```
 mig_server_callback is called off of the mach port run loop source to handle new messages on pmServerMachPort:
-
+```
   static void
   mig_server_callback(CFMachPortRef port, void *msg, CFIndex size, void *info)
   {
@@ -423,9 +423,9 @@ mig_server_callback is called off of the mach port run loop source to handle new
       
       /* we have a request message */
       (void) pm_mig_demux(&bufRequest->Head, &bufReply->Head);
-
+```
 This passes the raw message to pm_mig_demux:
-
+```
   static boolean_t 
   pm_mig_demux(
       mach_msg_header_t * request,
@@ -454,19 +454,19 @@ This passes the raw message to pm_mig_demux:
 
           return TRUE;
       }
-
+```
 This passes the message to the MIG-generated code for the powermanagement subsystem, if that fails (because the msgh_id doesn't
 match the subsystem for example) then this compares the message's msgh_id field to MACH_NOTIFY_DEAD_NAME.
 
 deadRequest is the message cast to a mach_dead_name_notification_t which is defined like this in mach/notify.h:
-
+```
   typedef struct {
       mach_msg_header_t   not_header;
       NDR_record_t        NDR;
       mach_port_name_t not_port;/* MACH_MSG_TYPE_PORT_NAME */
       mach_msg_format_0_trailer_t trailer;
   } mach_dead_name_notification_t;
-
+```
 This is a simple message, not a complex one. not_port is just a completely controlled integer which in this case will get passed directly to
 mach_port_deallocate.
 
@@ -481,11 +481,11 @@ notifications for powerd's task port. Once powerd's send right to its own task p
 I send a copy_powersources_info message, the receving code doesn't check the return value of a call to mach_vm_allocate which fails because the
 task's task port is wrong and leads to the use of an uninitialized pointer.
 
-*** Kernel Bug ****
+### Kernel Bug
 
 See above for a short writeup of the kernel bug exploit. I will try to write a long-form writeup soon, but the code should be kind of clear.
 
-*** Post-exploitation ****
+### Post-exploitation
 
 I've taken a slightly different approach post-exploitation. Everything is data-only, I don't make any patches to r/o kernel memory. This means
 things should also work on the iPhone 7 but I don't have one to test :(
